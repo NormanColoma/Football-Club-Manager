@@ -6,7 +6,6 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
 scalaVersion := "2.11.7"
 
-#Need to add JPA driver and PSQL (in this case) driver
 libraryDependencies ++= Seq(
   javaJdbc,
   cache,
