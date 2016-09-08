@@ -39,4 +39,16 @@ public class TeamController extends Controller {
         return created(toJson(team)).withHeaders("Location", "http://localhost:9000/api/teams/"+team.id);
     }
 
+    @Transactional
+    public Result deleteTeam(Integer id) {
+        Team team = jpaApi.em().find(Team.class, id);
+        if(team != null){
+          jpaApi.em().remove(team);
+          Result deleted = status(204, "Deleted response");
+          return deleted;
+        }
+        return notFound();
+
+    }
+
 }
