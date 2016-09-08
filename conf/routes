@@ -15,3 +15,4 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET    /api/teams                   controllers.TeamController.getTeams
 POST   /api/teams                   controllers.TeamController.addTeam
 DELETE /api/teams/:id               controllers.TeamController.deleteTeam(id: Integer)
+PUT    /api/teams/:id               controllers.TeamController.updateTeam(id: Integer)

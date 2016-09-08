@@ -51,4 +51,19 @@ public class TeamController extends Controller {
 
     }
 
+    @Transactional
+    @BodyParser.Of(BodyParser.Json.class)
+    public Result updateTeam(Integer id) {
+        Team team = jpaApi.em().find(Team.class, id);
+        if(team != null){
+          JsonNode json = request().body().asJson();
+          team.setName(json.findPath("name").textValue());
+          team.setAbout(json.findPath("about").textValue());
+          Result updated = status(204, "Updated response");
+          return updated;
+        }
+        return notFound();
+
+    }
+
 }
