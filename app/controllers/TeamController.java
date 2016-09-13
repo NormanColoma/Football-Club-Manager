@@ -3,8 +3,7 @@ package controllers;
 import java.util.List;
 import javax.inject.Inject;
 import models.Team;
-import play.data.FormFactory;
-import play.db.jpa.JPAApi;
+import models.TeamDAOImpl;
 import play.db.jpa.Transactional;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -15,16 +14,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class TeamController extends Controller {
 
-    private final JPAApi jpaApi;
 
-    @Inject
-    public TeamController(JPAApi jpaApi) {
-        this.jpaApi = jpaApi;
+    private TeamDAOImpl dao;
+    public TeamController(){
+      this.dao = new TeamDAOImpl();
     }
 
     @Transactional(readOnly = true)
     public Result getTeams() {
-        List<Team> teams = jpaApi.em().createQuery("select t from Team t", Team.class).getResultList();
+        List<Team> teams = dao.getTeams();
         return ok(toJson(teams));
     }
 
@@ -35,30 +33,27 @@ public class TeamController extends Controller {
         Team team = new Team();
         team.name = json.findPath("name").textValue();
         team.about = json.findPath("about").textValue();
-        jpaApi.em().persist(team);
+        team = dao.createTeam(team);
         return created(toJson(team)).withHeaders("Location", "http://localhost:9000/api/teams/"+team.id);
     }
 
     @Transactional
     public Result deleteTeam(Integer id) {
-        Team team = jpaApi.em().find(Team.class, id);
-        if(team != null){
-          jpaApi.em().remove(team);
+        if(dao.deleteTeam(id)){
           Result deleted = status(204, "Deleted response");
           return deleted;
         }
         return notFound();
-
     }
 
     @Transactional
     @BodyParser.Of(BodyParser.Json.class)
     public Result updateTeam(Integer id) {
-        Team team = jpaApi.em().find(Team.class, id);
-        if(team != null){
-          JsonNode json = request().body().asJson();
-          team.setName(json.findPath("name").textValue());
-          team.setAbout(json.findPath("about").textValue());
+        Team team = new Team();
+        JsonNode json = request().body().asJson();
+        team.name = json.findPath("name").textValue();
+        team.about = json.findPath("about").textValue();
+        if(dao.updateTeam(team,id)){
           Result updated = status(204, "Updated response");
           return updated;
         }
